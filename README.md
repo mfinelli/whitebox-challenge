@@ -43,3 +43,16 @@ and then you can find the resulting spreadsheet in the `output` directory.
   stuck with mysql (actually using mariadb in docker compose)
 - i only tested this on my macbook, but it's docker so in theory it works the
   same everywhere that docker runs
+- i'm hoping that I set the retry timeout long enough on the initial query. the
+  gist of what happens is when mariadb starts up the first time it needs to
+  load in the schema and data in the sql directory and then it does a restart.
+  if the node process tries to connect and query too quickly it will get a
+  connection refused. right now we're only catching that one time and then
+  waiting ten seconds for it to start back up before trying again. this was
+  enough time on my machine, but if the first run errors out, try just running
+  it again -- it won't need to do the data load and the first connection should
+  work without issue.
+- it needs better (or _any_) error handling. right now it will just blow up if
+  the `rates` table doesn't exist for some reason (or any of the other myriad of
+  things that might error along the way) -- we're assuming only the happy path
+  for this demo

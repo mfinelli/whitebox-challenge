@@ -18,4 +18,3 @@ services:
       MYSQL_PASSWORD: password # also not good
     volumes:
       - ./sql/:/docker-entrypoint-initdb.d/
-      # - ./my.cnf/:/etc/mysql/conf.d/
