@@ -56,3 +56,9 @@ and then you can find the resulting spreadsheet in the `output` directory.
   the `rates` table doesn't exist for some reason (or any of the other myriad of
   things that might error along the way) -- we're assuming only the happy path
   for this demo
+- if you want to run a different data set you'll need to remove the old mariadb
+  container and then run it again as the data only gets initialized on the first
+  run
+- you shouldn't put more than one file into the `sql` directory since the
+  mariadb image will play them all in alphabetical order so they could conflict
+  with or clobber each other
