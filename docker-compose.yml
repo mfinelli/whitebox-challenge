@@ -1,0 +1,16 @@
+---
+version: "3"
+services:
+  cooking:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mariadb
+  mariadb:
+    image: mariadb:10.5
+    environment:
+      MYSQL_ROOT_PASSWORD: root # not good
+      MYSQL_DATABASE: wbcc
+      MYSQL_USER: wbcc
+      MYSQL_PASSWORD: password # also not good
