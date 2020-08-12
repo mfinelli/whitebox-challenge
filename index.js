@@ -131,6 +131,11 @@ function intlZoneToCell(zone) {
 function parseResults(results) {
   results.forEach((row, index) => {
     if (row.locale === 'domestic' && row.shipping_speed === 'standard') {
+      // rows are ordered by start weight and it appears that end weight is
+      // always less than the _next_ start weight. so we just do the most simple
+      // thing and keep track of the last start wieght and if what we're working
+      // with is bigger than that then jump down to the next row and update the
+      // tracker.
       if (row.start_weight > dStandardLastStart) {
         dStandardCell++
         dStandardLastStart = row.start_weight
