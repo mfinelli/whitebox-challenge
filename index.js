@@ -2,7 +2,7 @@ const excel = require('excel4node');
 const fs = require("fs");
 const mysql = require('mysql');
 
-const DATASQL = 'data.sql'
+const clientId = '1240' // TODO: this should be configurable
 
 // these are hardcoded for now, it would be better to read in environmant
 // variables, and not use stuff like "password" :)
@@ -14,20 +14,55 @@ const connection = mysql.createConnection({
   charset: "latin1" // utf8mb4 is better, but data.sql specifies latin1
 });
 
+const workbook = new excel.Workbook();
+const dStandard = workbook.addWorksheet('Domestic Standard Rates');
+let dStandardCell = 2
+const dExpedited = workbook.addWorksheet('Domestic Expedited Rates');
+let dExpeditedCell = 2
+const dNextday = workbook.addWorksheet('Domestic Next Day Rates');
+let dNextdayCell = 2
+const iEconomy = workbook.addWorksheet('International Economy Rates');
+let iEconomyCell = 2
+const iExpedited = workbook.addWorksheet('International Expedited Rates');
+let iExpeditedCell = 2
 
-// let lyrics = 'But still I\'m having memories of high speeds when the cops crashed\n' +
-//              'As I laugh, pushin the gas while my Glocks blast\n' +
-//              'We was young and we was dumb but we had heart';
+let style1 = [dStandard, dExpedited, dNextday]
+let style2 = [iEconomy, iExpedited]
 
-// // write to a new file named 2pac.txt
-// fs.writeFile('/output/2pac.txt', lyrics, (err) => {
-//     // throws an error, you could also catch it here
-//     if (err) throw err;
+// set the headers for domestic
+style1.forEach((worksheet) => {
+  worksheet.cell(1, 1).string('Start Weight')
+  worksheet.cell(1, 2).string('End Weight')
+  worksheet.cell(1, 3).string('Zone 1')
+  worksheet.cell(1, 4).string('Zone 2')
+  worksheet.cell(1, 5).string('Zone 3')
+  worksheet.cell(1, 6).string('Zone 4')
+  worksheet.cell(1, 7).string('Zone 5')
+  worksheet.cell(1, 8).string('Zone 6')
+  worksheet.cell(1, 9).string('Zone 7')
+  worksheet.cell(1, 10).string('Zone 8')
+})
 
-//     // success case, the file was saved
-//     console.log('Lyric saved!');
-// });
-
+// set the headers for international
+style2.forEach((worksheet) => {
+  worksheet.cell(1, 1).string('Start Weight')
+  worksheet.cell(1, 2).string('End Weight')
+  worksheet.cell(1, 3).string('Zone A')
+  worksheet.cell(1, 4).string('Zone B')
+  worksheet.cell(1, 5).string('Zone C')
+  worksheet.cell(1, 6).string('Zone D')
+  worksheet.cell(1, 7).string('Zone E')
+  worksheet.cell(1, 8).string('Zone F')
+  worksheet.cell(1, 9).string('Zone G')
+  worksheet.cell(1, 10).string('Zone H')
+  worksheet.cell(1, 10).string('Zone I')
+  worksheet.cell(1, 10).string('Zone J')
+  worksheet.cell(1, 10).string('Zone K')
+  worksheet.cell(1, 10).string('Zone L')
+  worksheet.cell(1, 10).string('Zone M')
+  worksheet.cell(1, 10).string('Zone N')
+  worksheet.cell(1, 10).string('Zone O')
+})
 
 function runTheQuery() {
   // if (fs.existsSync(DATASQL)) {
@@ -85,29 +120,10 @@ setTimeout(() => {
     throw error;
   }
 
-  const workbook = new excel.Workbook();
-  const dStandard = workbook.addWorksheet('Domestic Standard Rates');
-  let dStandardCell = 2
-  const dExpedited = workbook.addWorksheet('Domestic Expedited Rates');
-  let dExpeditedCell = 2
-  const dNextday = workbook.addWorksheet('Domestic Next Day Rates');
-  let dNextdayCell = 2
-  const iEconomy = workbook.addWorksheet('International Economy Rates');
-  let iEconomyCell = 2
-  const iExpedited = workbook.addWorksheet('International Expedited Rates');
-  let iExpeditedCell = 2
+
 
   // set the headers
-  dStandard.cell(1, 1).string('Start Weight')
-  dStandard.cell(1, 2).string('End Weight')
-  dStandard.cell(1, 3).string('Zone 1')
-  dStandard.cell(1, 4).string('Zone 2')
-  dStandard.cell(1, 5).string('Zone 3')
-  dStandard.cell(1, 6).string('Zone 4')
-  dStandard.cell(1, 7).string('Zone 5')
-  dStandard.cell(1, 8).string('Zone 6')
-  dStandard.cell(1, 9).string('Zone 7')
-  dStandard.cell(1, 10).string('Zone 8')
+
 
   // results.forEach((row, i) => {
   //   console.log(row)
@@ -125,24 +141,8 @@ setTimeout(() => {
     });
   })
 
-//     let lyrics = 'But still I\'m having memories of high speeds when the cops crashed\n' +
-//              'As I laugh, pushin the gas while my Glocks blast\n' +
-//              'We was young and we was dumb but we had heart';
-
-// // write to a new file named 2pac.txt
-//     fs.writeFile('/output/2pac.txt', lyrics, (err) => {
-//         // throws an error, you could also catch it here
-//         if (err) throw err;
-
-//         // success case, the file was saved
-//         console.log('Lyric saved!');
-//     });
-
-  // setTimeout(() => {console.log('ok')}, 3000)
-
   console.log('no here')
   // runTheQuexry()
   connection.end()
-  // process.exit(0)
 });
 }, 1000)
