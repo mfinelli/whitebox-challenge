@@ -107,6 +107,26 @@ function parseResults(results) {
       }
 
       dStandard.cell(dStandardCell, domesticZoneToCell(row.zone)).string(row.rate.toFixed(2))
+    } else if (row.locale === 'domestic' && row.shipping_speed === 'expedited') {
+      if (row.start_weight > dExpeditedLastStart) {
+        dExpeditedCell++
+        dExpeditedLastStart = row.start_weight
+
+        dExpedited.cell(dExpeditedCell, 1).string(row.start_weight.toFixed(2))
+        dExpedited.cell(dExpeditedCell, 2).string(row.end_weight.toFixed(2))
+      }
+
+      dExpedited.cell(dExpeditedCell, domesticZoneToCell(row.zone)).string(row.rate.toFixed(2))
+    } else if (row.locale === 'domestic' && row.shipping_speed === 'nextDay') {
+      if (row.start_weight > dNextdayLastStart) {
+        dNextdayCell++
+        dNextdayLastStart = row.start_weight
+
+        dNextday.cell(dNextdayCell, 1).string(row.start_weight.toFixed(2))
+        dNextday.cell(dNextdayCell, 2).string(row.end_weight.toFixed(2))
+      }
+
+      dNextday.cell(dNextdayCell, domesticZoneToCell(row.zone)).string(row.rate.toFixed(2))
     }
   })
 
