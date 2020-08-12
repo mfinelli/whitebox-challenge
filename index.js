@@ -63,13 +63,13 @@ style2.forEach((worksheet) => {
   worksheet.cell(1, 8).string('Zone F')
   worksheet.cell(1, 9).string('Zone G')
   worksheet.cell(1, 10).string('Zone H')
-  worksheet.cell(1, 10).string('Zone I')
-  worksheet.cell(1, 10).string('Zone J')
-  worksheet.cell(1, 10).string('Zone K')
-  worksheet.cell(1, 10).string('Zone L')
-  worksheet.cell(1, 10).string('Zone M')
-  worksheet.cell(1, 10).string('Zone N')
-  worksheet.cell(1, 10).string('Zone O')
+  worksheet.cell(1, 11).string('Zone I')
+  worksheet.cell(1, 12).string('Zone J')
+  worksheet.cell(1, 13).string('Zone K')
+  worksheet.cell(1, 14).string('Zone L')
+  worksheet.cell(1, 15).string('Zone M')
+  worksheet.cell(1, 16).string('Zone N')
+  worksheet.cell(1, 17).string('Zone O')
 })
 
 function domesticZoneToCell(zone) {
@@ -90,6 +90,41 @@ function domesticZoneToCell(zone) {
       return 9;
     case '8':
       return 10;
+  }
+}
+
+function intlZoneToCell(zone) {
+  switch(zone) {
+    case 'A':
+      return 3;
+    case 'B':
+      return 4;
+    case 'C':
+      return 5;
+    case 'D':
+      return 6;
+    case 'E':
+      return 7;
+    case 'F':
+      return 8;
+    case 'G':
+      return 9;
+    case 'H':
+      return 10;
+    case 'I':
+      return 11;
+    case 'J':
+      return 12;
+    case 'K':
+      return 13;
+    case 'L':
+      return 14;
+    case 'M':
+      return 15;
+    case 'N':
+      return 16;
+    case 'O':
+    return 17;
   }
 }
 
@@ -127,6 +162,26 @@ function parseResults(results) {
       }
 
       dNextday.cell(dNextdayCell, domesticZoneToCell(row.zone)).string(row.rate.toFixed(2))
+    } else if (row.locale === 'international' && row.shipping_speed === 'intlEconomy') {
+      if (row.start_weight > iEconomyLastStart) {
+        iEconomyCell++
+        iEconomyLastStart = row.start_weight
+
+        iEconomy.cell(iEconomyCell, 1).string(row.start_weight.toFixed(2))
+        iEconomy.cell(iEconomyCell, 2).string(row.end_weight.toFixed(2))
+      }
+
+      iEconomy.cell(iEconomyCell, intlZoneToCell(row.zone)).string(row.rate.toFixed(2))
+    } else if (row.locale === 'international' && row.shipping_speed === 'intlExpedited') {
+      if (row.start_weight > iExpeditedLastStart) {
+        iExpeditedCell++
+        iExpeditedLastStart = row.start_weight
+
+        iExpedited.cell(iExpeditedCell, 1).string(row.start_weight.toFixed(2))
+        iExpedited.cell(iExpeditedCell, 2).string(row.end_weight.toFixed(2))
+      }
+
+      iExpedited.cell(iExpeditedCell, intlZoneToCell(row.zone)).string(row.rate.toFixed(2))
     }
   })
 
