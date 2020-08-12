@@ -5,7 +5,7 @@ const mysql = require('mysql');
 const clientId = '1240' // TODO: this should be configurable
 
 let query = 'SELECT * FROM `rates` WHERE `client_id` = \'' + clientId +
-  '\' ORDER BY `zone`, `start_weight`, `end_weight`'
+  '\' ORDER BY `start_weight`, `zone`'
 
 // these are hardcoded for now, it would be better to read in environmant
 // variables, and not use stuff like "password" :)
@@ -19,15 +19,20 @@ const connectionDetails = {
 
 const workbook = new excel.Workbook();
 const dStandard = workbook.addWorksheet('Domestic Standard Rates');
-let dStandardCell = 2
+let dStandardCell = 1
+let dStandardLastStart = 0.0
 const dExpedited = workbook.addWorksheet('Domestic Expedited Rates');
-let dExpeditedCell = 2
+let dExpeditedCell = 1
+let dExpeditedLastStart = 0.0
 const dNextday = workbook.addWorksheet('Domestic Next Day Rates');
-let dNextdayCell = 2
+let dNextdayCell = 1
+let dNextdayLastStart = 0.0
 const iEconomy = workbook.addWorksheet('International Economy Rates');
-let iEconomyCell = 2
+let iEconomyCell = 1
+let iEconomyLastStart = 0.0
 const iExpedited = workbook.addWorksheet('International Expedited Rates');
-let iExpeditedCell = 2
+let iExpeditedCell = 1
+let iExpeditedLastStart = 0.0
 
 let style1 = [dStandard, dExpedited, dNextday]
 let style2 = [iEconomy, iExpedited]
@@ -67,15 +72,48 @@ style2.forEach((worksheet) => {
   worksheet.cell(1, 10).string('Zone O')
 })
 
+function domesticZoneToCell(zone) {
+  switch(zone) {
+    case '1':
+      return 3;
+    case '2':
+      return 4;
+    case '3':
+      return 5;
+    case '4':
+      return 6;
+    case '5':
+      return 7;
+    case '6':
+      return 8;
+    case '7':
+      return 9;
+    case '8':
+      return 10;
+  }
+}
+
 function parseResults(results) {
+  results.forEach((row, index) => {
+    if (row.locale === 'domestic' && row.shipping_speed === 'standard') {
+      if (row.start_weight > dStandardLastStart) {
+        dStandardCell++
+        dStandardLastStart = row.start_weight
+
+        // "number" is technically better here, but the provided output uses
+        // string values so we match to be consistent
+        dStandard.cell(dStandardCell, 1).string(row.start_weight.toFixed(2))
+        dStandard.cell(dStandardCell, 2).string(row.end_weight.toFixed(2))
+      }
+
+      dStandard.cell(dStandardCell, domesticZoneToCell(row.zone)).string(row.rate.toFixed(2))
+    }
+  })
+
   workbook.writeToBuffer().then((buffer) => {
     fs.writeFile("/output/output.xlsx", buffer, (err) => {
-      if (err)
-        console.log(err);
-      else {
-        console.log("File written successfully\n");
-      }
-    });
+      if (err) throw err;
+    })
   })
 }
 
