@@ -1,10 +1,12 @@
 ---
 version: "3"
 services:
-  cooking:
+  wbcc:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./output/:/output/
     depends_on:
       - mariadb
   mariadb:
@@ -14,3 +16,6 @@ services:
       MYSQL_DATABASE: wbcc
       MYSQL_USER: wbcc
       MYSQL_PASSWORD: password # also not good
+    volumes:
+      - ./sql/:/docker-entrypoint-initdb.d/
+      # - ./my.cnf/:/etc/mysql/conf.d/
