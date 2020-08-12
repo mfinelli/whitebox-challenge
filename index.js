@@ -4,15 +4,18 @@ const mysql = require('mysql');
 
 const clientId = '1240' // TODO: this should be configurable
 
+let query = 'SELECT * FROM `rates` WHERE `client_id` = \'' + clientId +
+  '\' ORDER BY `zone`, `start_weight`, `end_weight`'
+
 // these are hardcoded for now, it would be better to read in environmant
 // variables, and not use stuff like "password" :)
-const connection = mysql.createConnection({
+const connectionDetails = {
   host: "mariadb", // points to the mariadb image in docker-compose.yml
   user: "wbcc",
   password: "password",
   database: "wbcc",
   charset: "latin1" // utf8mb4 is better, but data.sql specifies latin1
-});
+}
 
 const workbook = new excel.Workbook();
 const dStandard = workbook.addWorksheet('Domestic Standard Rates');
@@ -64,73 +67,7 @@ style2.forEach((worksheet) => {
   worksheet.cell(1, 10).string('Zone O')
 })
 
-function runTheQuery() {
-  // if (fs.existsSync(DATASQL)) {
-  //   const data = fs.readFileSync(DATASQL, "utf8")
-
-  //   connection.query('select 1;', (error, results, fields) => {
-  //     console.log(error, results, fields)
-  //   })
-
-  //   // // this loads all of the initial data provided by data.sql
-  //   // connection.query(data, (error, results, fields) => {
-  //   //   if (error) throw error;
-
-  //   //   console.log(results)
-  //   //   console.log(fields)
-
-  //   //   // now do the filtering as requested
-  //   //   // TODO: the client ID should be configurable...
-  //   //   const clientId = '1240'
-  //   //   connection.query('SELECT * FROM `rates` where client_id = \'' + clientId + '\'', (error, results, fields) => {
-  //   //     if (error) throw error;
-
-  //   //     console.log(results)
-  //   //   })
-  //   // })
-  // } else {
-  //   console.error("unable to find " + DATASQL,
-  //     "(maybe you need to gunzip it first?)")
-  //   process.exit(1)
-  // }
-}
-
-setTimeout(() => {
-  const clientId = '1240'
-  connection.query('SELECT * FROM `rates` where client_id = \'' + clientId + '\' order by zone, start_weight, end_weight', function (error, results, fields) {
-  if (error) {
-    // this will almost certainly happen because we need to wait for the mariadb
-    // to come up. it would be better to retry in a loop with a smaller wait
-    // time in-between and then give up after x retries, but we'll just hard
-    // code sufficiently long time and then move on
-    // sufficiently long time a
-    // setTimeout(() => {
-    //   connection.query('SELECT 1', function(error, results, fields) {
-    //     // if we error again, then just bail
-    //     if (error) throw error;
-
-    //     console.log('here')
-
-    //     runTheQuery()
-    //     connection.end()
-    //     process.exit(0)
-    //   })
-    // }, 10000) // 10 seconds was enough on my macbook
-
-    throw error;
-  }
-
-
-
-  // set the headers
-
-
-  // results.forEach((row, i) => {
-  //   console.log(row)
-  // })
-
-  console.log(results.length)
-
+function parseResults(results) {
   workbook.writeToBuffer().then((buffer) => {
     fs.writeFile("/output/output.xlsx", buffer, (err) => {
       if (err)
@@ -140,9 +77,28 @@ setTimeout(() => {
       }
     });
   })
+}
 
-  console.log('no here')
-  // runTheQuexry()
-  connection.end()
-});
-}, 1000)
+let connection = mysql.createConnection(connectionDetails)
+
+connection.query(query, (error, results, fields) => {
+  if (error) {
+    // this always fails on a fresh docker-compose up, as the database is not
+    // initialized and we get a connection refused. it would be better to retry
+    // in a loop and then bail after x attempts, but we're just going to
+    // hardcode one attempt for this demo.
+    setTimeout(() => {
+      connection = mysql.createConnection(connectionDetails)
+
+      connection.query(query, (error, results, fields) => {
+        console.log(results.length)
+        parseResults(results)
+        connection.end()
+      })
+    }, 10000)
+  } else {
+    console.log(results.length)
+    parseResults(results)
+    connection.end()
+  }
+})
